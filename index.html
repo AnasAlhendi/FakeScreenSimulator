@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Screen Simulator</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="header">
+      <h1>Screen Simulator</h1>
+      <p class="sub">Preview a page at specific pixel and physical sizes.</p>
+    </header>
+
+    <section class="controls">
+      <div class="row">
+        <label>
+          Screen
+          <select id="presetSelect">
+            <option value="">-- Select a screen --</option>
+          </select>
+        </label>
+        <label>
+          Width (px)
+          <input id="widthPx" type="number" min="1" value="1080" />
+        </label>
+        <label>
+          Height (px)
+          <input id="heightPx" type="number" min="1" value="1920" />
+        </label>
+        <label>
+          Diagonal (in)
+          <input id="diagIn" type="number" min="0" step="0.01" placeholder="optional" />
+        </label>
+        <label>
+          PPI
+          <input id="ppi" type="number" min="1" step="0.1" placeholder="optional" />
+        </label>
+      </div>
+      <div class="row">
+        <label>
+          CSS DPI (calibration)
+          <input id="cssDpi" type="number" min="10" step="1" value="96" />
+        </label>
+        <label class="checkbox">
+          <input id="fitPreview" type="checkbox" /> Fit to viewport
+        </label>
+        <button id="rotateBtn" type="button">Rotate</button>
+        <button id="renderBtn" type="button" class="primary">Render</button>
+        <button id="openWinBtn" type="button">Open Window</button>
+        <label>
+          Font px
+          <input id="fontPx" type="number" min="1" step="1" value="8" />
+        </label>
+        <button id="fontBtn" type="button">Font Sample</button>
+        <label>
+          Pattern
+          <select id="patternSelect">
+            <option value="grid">Grid</option>
+            <option value="checker">Checkerboard</option>
+            <option value="bars-h">Bars H</option>
+            <option value="bars-v">Bars V</option>
+            <option value="solid">Solid</option>
+          </select>
+        </label>
+        <label>
+          Cell px
+          <input id="cellPx" type="number" min="1" step="1" value="10" />
+        </label>
+        <button id="pixelBtn" type="button">Pixel Pattern</button>
+        <button id="analyzeBtn" type="button">Analyze PX</button>
+        <button id="boxesBtn" type="button">Boxes Preview</button>
+      </div>
+      <div class="hint">
+        Paste your HTML/CSS/JS below and click Render. Choose a screen to auto-fill size and PPI. Optionally place test.md nearby to extend.
+      </div>
+    </section>
+
+    <section class="analysis">
+      <div id="pxReport" class="px-report"></div>
+    </section>
+
+    <section class="editor">
+      <div class="editor-col">
+        <label>HTML/CSS/JS (one file)
+          <textarea id="codeInput" spellcheck="false" placeholder="<!doctype html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <style>/* Your CSS here */</style>
+    <script>/* Your JS here */</script>
+  </head>
+  <body>Paste your page here</body>
+</html>"></textarea>
+        </label>
+      </div>
+    </section>
+
+    <section class="calibrate">
+      <div class="ruler" aria-label="1 inch calibration box">
+        1"
+      </div>
+      <div class="metrics" id="metrics"></div>
+    </section>
+
+    <section class="preview-wrap">
+      <div id="frameOuter" class="frame-outer">
+        <iframe id="previewFrame" title="Preview" sandbox="allow-scripts allow-forms allow-same-origin allow-pointer-lock allow-popups allow-modals"></iframe>
+      </div>
+      <div id="note" class="note"></div>
+    </section>
+
+    <footer class="footer">
+      <div>
+        Some sites may refuse to load in an iframe due to security headers (X-Frame-Options/Content-Security-Policy). If that happens, try another URL.
+      </div>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+  </html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>ISO 9241 – كل الشاشات</title>
+    <style>
+        :root {
+            --touch-mm: 20; /* مساحة لمس دنيا بالـ mm */
+            --gap-mm: 5;    /* مسافة دنيا بالـ mm */
+            --px-per-mm: 5.565px; /* افتراضي: 15.6" */
+            --min-font-px: 13px;
+        }
+
+        /* 15.6" 1080x1920 */
+        [data-model="zelos-15-6"] {
+            --px-per-mm: 5.565px;
+            --min-font-px: 13px;
+        }
+
+        /* 21.6" 1080x1920 */
+        [data-model="pyramid-21-6"] {
+            --px-per-mm: 4px;
+            --min-font-px: 10px;
+        }
+
+        /* 22" 1080x1920 */
+        [data-model="zelos-22"] {
+            --px-per-mm: 4px; /* عملياً نفس 21.6" */
+            --min-font-px: 10px;
+        }
+
+        /* 19" 1280x1024 */
+        [data-model="mitra-19"] {
+            --px-per-mm: 3.4px;
+            --min-font-px: 8px;
+        }
+
+        /* 15" 1024x768 */
+        [data-model="mitra-15"] {
+            --px-per-mm: 3.4px; /* نفس 19" */
+            --min-font-px: 8px;
+        }
+
+        /* شكل الواجهة */
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 24px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        button, select {
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .status {
+            margin-top: 8px;
+            font-size: 14px;
+            opacity: .8
+        }
+
+        .touch-grid {
+            display: grid;
+            grid-template-columns: repeat(5, auto);
+            gap: calc(var(--gap-mm) * var(--px-per-mm));
+            margin-top: 28px;
+        }
+
+        .touch-target {
+            min-width: calc(var(--touch-mm) * var(--px-per-mm));
+            min-height: calc(var(--touch-mm) * var(--px-per-mm));
+            background: #ddd;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--min-font-px);
+            line-height: 1.2;
+            user-select: none;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body data-model="zelos-15-6">
+<h2>معايرة لمس ISO 9241 – تبديل كل الشاشات</h2>
+
+<div class="controls">
+    <button id="prevBtn">السابق</button>
+    <select id="profileSelect">
+        <option value="zelos-15-6">15.6” Zelos (1080×1920)</option>
+        <option value="pyramid-21-6">21.6” Pyramid (1080×1920)</option>
+        <option value="zelos-22">22” Zelos (1080×1920)</option>
+        <option value="mitra-19">19” Mitra/Vana (1280×1024)</option>
+        <option value="mitra-15">15” Mitra (1024×768)</option>
+    </select>
+    <button id="nextBtn">التالي</button>
+</div>
+
+<div class="status" id="statusText"></div>
+
+<div class="touch-grid">
+    <div class="touch-target">1</div>
+    <div class="touch-target">2</div>
+    <div class="touch-target">3</div>
+    <div class="touch-target">4</div>
+    <div class="touch-target">5</div>
+    <div class="touch-target">6</div>
+    <div class="touch-target">7</div>
+    <div class="touch-target">8</div>
+    <div class="touch-target">9</div>
+    <div class="touch-target">10</div>
+</div>
+
+<script>
+    const profiles = [
+        {key: 'zelos-15-6', label: '15.6” Zelos (1080×1920)', pxPerMm: 5.565, minFont: 13},
+        {key: 'pyramid-21-6', label: '21.6” Pyramid (1080×1920)', pxPerMm: 4.0, minFont: 10},
+        {key: 'zelos-22', label: '22” Zelos (1080×1920)', pxPerMm: 4.0, minFont: 10},
+        {key: 'mitra-19', label: '19” Mitra/Vana (1280×1024)', pxPerMm: 3.4, minFont: 8},
+        {key: 'mitra-15', label: '15” Mitra (1024×768)', pxPerMm: 3.4, minFont: 8},
+    ];
+
+    const body = document.body;
+    const sel = document.getElementById('profileSelect');
+    const prev = document.getElementById('prevBtn');
+    const next = document.getElementById('nextBtn');
+    const status = document.getElementById('statusText');
+
+    function applyProfile(key) {
+        body.setAttribute('data-model', key);
+        sel.value = key;
+
+        const p = profiles.find(x => x.key === key);
+        const touchPx = Math.round(p.pxPerMm * 20);  // 20mm
+        const gapPx = Math.round(p.pxPerMm * 5);     // 5mm
+        status.textContent =
+            `الوضع الحالي: ${p.label} — مساحة اللمس الدنيا ≈ ${touchPx}px × ${touchPx}px، المسافة الدنيا ≈ ${gapPx}px، حدّ خط ≈ ${p.minFont}px`;
+    }
+
+    sel.addEventListener('change', e => applyProfile(e.target.value));
+
+    prev.addEventListener('click', () => {
+        const i = profiles.findIndex(x => x.key === sel.value);
+        const j = (i - 1 + profiles.length) % profiles.length;
+        applyProfile(profiles[j].key);
+    });
+
+    next.addEventListener('click', () => {
+        const i = profiles.findIndex(x => x.key === sel.value);
+        const j = (i + 1) % profiles.length;
+        applyProfile(profiles[j].key);
+    });
+
+    // بداية افتراضية
+    applyProfile('zelos-15-6');
+</script>
+</body>
+</html>
