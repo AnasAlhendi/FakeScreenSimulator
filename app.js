@@ -18,14 +18,8 @@ const els = {
   frameOuter: document.getElementById('frameOuter'),
   frame: document.getElementById('previewFrame'),
   metrics: document.getElementById('metrics'),
-    openWinBtn: document.getElementById('openWinBtn'),
-    patternSelect: document.getElementById('patternSelect'),
-    cellPx: document.getElementById('cellPx'),
-    pixelBtn: document.getElementById('pixelBtn'),
-    analyzeBtn: document.getElementById('analyzeBtn'),
-    boxesBtn: document.getElementById('boxesBtn'),
-    pxReport: document.getElementById('pxReport'),
-    note: document.getElementById('note'),
+  openWinBtn: document.getElementById('openWinBtn'),
+  note: document.getElementById('note'),
 };
 
 function computePpi(widthPx, heightPx, diagonalIn, manualPpi) {
@@ -133,144 +127,8 @@ function renderToIframe() {
 }
 
 // Analyze px values in the code input and show chips with physical mm
-function analyzePxFromCode() {
-  const code = String(els.codeInput.value || '');
-  const re = /(\d+(?:\.\d+)?)\s*px\b/gi;
-  const found = new Set();
-  let m;
-  while ((m = re.exec(code))) {
-    const n = Number(m[1]);
-    if (n > 0) found.add(n);
-  }
-  const values = Array.from(found).sort((a,b)=>a-b);
-  const widthPx = Math.max(1, Number(els.wpx.value || 0));
-  const heightPx = Math.max(1, Number(els.hpx.value || 0));
-  const diagonalIn = Number(els.diag.value || 0);
-  const manualPpi = Number(els.ppi.value || 0);
-  const ppi = computePpi(widthPx, heightPx, diagonalIn, manualPpi);
-  const mmPerPx = 25.4 / ppi;
-  if (!els.pxReport) return values;
-  if (!values.length) {
-    els.pxReport.innerHTML = '<div class="row">No px values found.</div>';
-    return values;
-  }
-  const chips = values.map(v => `<span class="chip">${v}px ≈ ${(v*mmPerPx).toFixed(2)} mm</span>`);
-  els.pxReport.innerHTML = `<div class="row">${chips.join(' ')}</div>`;
-  return values;
-}
 
-function renderPxBoxes(values) {
-  const widthPx = Math.max(1, Number(els.wpx.value || 0));
-  const heightPx = Math.max(1, Number(els.hpx.value || 0));
-  const diagonalIn = Number(els.diag.value || 0);
-  const manualPpi = Number(els.ppi.value || 0);
-  const ppi = computePpi(widthPx, heightPx, diagonalIn, manualPpi);
-  const mmPerPx = 25.4 / ppi;
-  const items = values.slice(0, 50);
-  const rows = items.map(v => `
-    <div class="row">
-      <div class="label">${v}px</div>
-      <div class="box" style="width:${v}px"></div>
-      <div class="phys">≈ ${(v*mmPerPx).toFixed(2)} mm</div>
-    </div>`).join('');
-  const html = `<!doctype html><html><head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PX Boxes</title>
-  <style>
-    html, body { height: 100%; }
-    body { margin: 0; font-family: system-ui, Segoe UI, Roboto, Arial, sans-serif; color:#111; background:#fff; }
-    .wrap { padding: 12px; }
-    .row { display:flex; align-items:center; gap:12px; margin:8px 0; }
-    .label { width: 72px; color:#333; font: 12px/1.2 ui-monospace, Menlo, Consolas, monospace; }
-    .box { height: 18px; background:#4f8cff; border:1px solid #2a66e3; border-radius:4px; }
-    .phys { color:#333; font: 12px/1.2 ui-monospace, Menlo, Consolas, monospace; }
-    .inch { width: 96px; height: 12px; background:#000; margin-top: 10px; }
-  </style>
-  </head><body>
-  <div class="wrap">
-    <div style="color:#555; font:12px/1.2 ui-monospace, Menlo, Consolas, monospace;">1px ≈ ${mmPerPx.toFixed(3)} mm</div>
-    ${rows}
-    <div class="inch"></div>
-    <div style="color:#555; font:12px/1.2 ui-monospace, Menlo, Consolas, monospace;">1 inch (96 CSS px)</div>
-  </div>
-  </body></html>`;
-  const blob = new Blob([html], { type: 'text/html' });
-  if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
-  currentBlobUrl = URL.createObjectURL(blob);
-  els.frame.src = currentBlobUrl;
-  els.note.textContent = 'Showing px boxes preview.';
-  currentMode = 'pxboxes';
-}
 
-function renderPixelPattern() {
-  const pattern = (els.patternSelect.value || 'grid');
-  const cell = Math.max(1, Number(els.cellPx.value || 10));
-  // Build CSS backgrounds for patterns
-  let bg = '#fff';
-  if (pattern === 'grid') {
-    bg = `
-      linear-gradient(to right, rgba(0,0,0,0.25) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(0,0,0,0.25) 1px, transparent 1px)
-    `;
-  } else if (pattern === 'checker') {
-    bg = `
-      linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%, #eee),
-      linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%, #eee)
-    `;
-  } else if (pattern === 'bars-h') {
-    bg = `repeating-linear-gradient(to bottom, #000 0, #000 1px, #fff 1px, #fff ${cell}px)`;
-  } else if (pattern === 'bars-v') {
-    bg = `repeating-linear-gradient(to right, #000 0, #000 1px, #fff 1px, #fff ${cell}px)`;
-  } else if (pattern === 'solid') {
-    bg = '#ddd';
-  }
-
-  const widthPx = Math.max(1, Number(els.wpx.value || 0));
-  const heightPx = Math.max(1, Number(els.hpx.value || 0));
-  const diagonalIn = Number(els.diag.value || 0);
-  const manualPpi = Number(els.ppi.value || 0);
-  const ppi = computePpi(widthPx, heightPx, diagonalIn, manualPpi);
-  const mmPerPx = 25.4 / ppi;
-  const mm100 = (100 * mmPerPx).toFixed(2);
-
-  // For grid/checker background-size
-  let extraCss = '';
-  if (pattern === 'grid') {
-    extraCss = `background-size: ${cell}px ${cell}px, ${cell}px ${cell}px; background-position: 0 0, 0 0;`;
-  } else if (pattern === 'checker') {
-    extraCss = `background-size: ${cell * 2}px ${cell * 2}px, ${cell * 2}px ${cell * 2}px; background-position: 0 0, ${cell}px ${cell}px;`;
-  }
-
-  const html = `<!doctype html><html lang="en"><head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pixel Pattern</title>
-  <style>
-    html, body { height: 100%; }
-    body { margin: 0; font-family: system-ui, Segoe UI, Roboto, Arial, sans-serif; }
-    .wrap { padding: 12px; }
-    .panel { margin-bottom: 10px; color: #333; }
-    .area { width: 100%; height: calc(100% - 90px); border: 1px solid #ccc; border-radius: 8px; ${extraCss} background: ${bg}; }
-    .ruler { margin-top: 10px; height: 14px; position: relative; }
-    .bar { width: 100px; height: 100%; background: #4f8cff; }
-    .label { position: absolute; left: 0; top: 18px; font: 12px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: #333; }
-  </style>
-  </head><body>
-    <div class="wrap">
-      <div class="panel">Pattern: ${pattern} | cell: ${cell}px | 1px ≈ ${mmPerPx.toFixed(3)} mm</div>
-      <div class="area"></div>
-      <div class="ruler"><div class="bar"></div><div class="label">100 px ≈ ${mm100} mm</div></div>
-    </div>
-  </body></html>`;
-
-  const blob = new Blob([html], { type: 'text/html' });
-  if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
-  currentBlobUrl = URL.createObjectURL(blob);
-  els.frame.src = currentBlobUrl;
-  els.note.textContent = 'Showing pixel pattern.';
-  currentMode = 'pixel';
-}
 function renderFontSample() {
   const sizePx = Math.max(1, Number(els.fontPx.value || 8));
   const widthPx = Math.max(1, Number(els.wpx.value || 0));
@@ -806,6 +664,7 @@ const builtinPresets = [
 setPresets(builtinPresets);
 // 2) Optionally extend/override from test.md if available
 tryFetchPresets();
+
 
 
 

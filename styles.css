@@ -112,7 +112,4 @@ body {
 
 .footer { padding: 12px 16px; color: var(--muted); border-top: 1px solid var(--border); }
 
-.analysis { padding: 8px 16px 16px; }
-.px-report { color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-.px-report .row { display: flex; gap: 18px; flex-wrap: wrap; }
-.px-report .chip { background: #12161d; border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; color: var(--fg); }
+/* removed analysis/px-report UI */
